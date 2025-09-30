@@ -1,11 +1,14 @@
 
 const express = require("express");
 const sequelize = require("./config/db");
+
+const paperRoutes = require("./routes/paper");
 const authRoutes = require("./routes/auth");
 
 const app = express();
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/papers", paperRoutes);
 
 sequelize
   .sync()
