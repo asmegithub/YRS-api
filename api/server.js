@@ -6,8 +6,16 @@ const authRoutes = require("./routes/auth");
 const commentRoutes = require("./routes/comment");
 const adminRoutes = require("./routes/admin");
 
+const cors = require("cors");
+
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use("/api/auth", authRoutes);
 app.use("/api/papers", paperRoutes);
 app.use("/api/research-papers/:paperId/comments", commentRoutes);
