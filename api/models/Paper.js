@@ -10,12 +10,34 @@ const Paper = sequelize.define("Paper", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  authors: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  institution: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  keywords: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   contentUrl: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  submissionLink: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   status: {
-    type: DataTypes.ENUM("submitted", "under_review", "accepted", "rejected", "published"),
+    type: DataTypes.ENUM(
+      "submitted",
+      "under_review",
+      "accepted",
+      "rejected",
+      "published"
+    ),
     defaultValue: "submitted",
   },
   authorId: {

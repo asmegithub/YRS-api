@@ -3,26 +3,53 @@ const User = require("../models/User");
 
 // Submit a new paper
 exports.submitPaper = async (req, res) => {
-  const { title, abstract, contentUrl } = req.body;
+  const { title, abstract, contentUrl, submissionLink, authors, institution, keywords } = req.body;
   try {
     const paper = await Paper.create({
       title,
       abstract,
       contentUrl,
+      submissionLink,
+      authors,
+      institution,
+      keywords,
       authorId: req.user.id,
     });
     res.status(201).json({ success: true, paper });
   } catch (error) {
+    console.error('paperController.submitPaper error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-// Get all published papers (public)
+// Get papers with flexible queries (public by default)
+// Query params:
+// - mine=true => return papers authored by the authenticated user
+// - status=all => (admin) return all papers
+// default: return published papers
 exports.getPublishedPapers = async (req, res) => {
   try {
+    const { mine, status } = req.query;
+    // If mine=true and user authenticated
+    if (mine === "true") {
+      if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+      const papers = await Paper.findAll({ where: { authorId: req.user.id } });
+      return res.json(papers);
+    }
+
+    // If admin requests all
+    if (status === "all") {
+      if (!req.user || req.user.role !== "admin")
+        return res.status(403).json({ error: "Admin only" });
+      const papers = await Paper.findAll();
+      return res.json(papers);
+    }
+
+    // Default: published only
     const papers = await Paper.findAll({ where: { status: "published" } });
     res.json(papers);
   } catch (error) {
+    console.error('paperController.getPublishedPapers error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -43,6 +70,7 @@ exports.getPaperById = async (req, res) => {
     }
     res.json(paper);
   } catch (error) {
+    console.error('paperController.getPaperById error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -50,7 +78,7 @@ exports.getPaperById = async (req, res) => {
 // Update paper (author only, if not published)
 exports.updatePaper = async (req, res) => {
   const { id } = req.params;
-  const { title, abstract, contentUrl } = req.body;
+  const { title, abstract, contentUrl, submissionLink, authors, institution, keywords } = req.body;
   try {
     const paper = await Paper.findByPk(id);
     if (!paper) return res.status(404).json({ error: "Paper not found" });
@@ -60,9 +88,14 @@ exports.updatePaper = async (req, res) => {
     paper.title = title || paper.title;
     paper.abstract = abstract || paper.abstract;
     paper.contentUrl = contentUrl || paper.contentUrl;
+    paper.submissionLink = submissionLink || paper.submissionLink;
+    paper.authors = authors || paper.authors;
+    paper.institution = institution || paper.institution;
+    paper.keywords = keywords || paper.keywords;
     await paper.save();
     res.json({ success: true, paper });
   } catch (error) {
+    console.error('paperController.updatePaper error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -79,6 +112,7 @@ exports.deletePaper = async (req, res) => {
     await paper.destroy();
     res.json({ success: true });
   } catch (error) {
+    console.error('paperController.deletePaper error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -100,6 +134,7 @@ exports.reviewPaper = async (req, res) => {
     await paper.save();
     res.json({ success: true, paper });
   } catch (error) {
+    console.error('paperController.reviewPaper error:', error);
     res.status(500).json({ error: "Server error" });
   }
 };

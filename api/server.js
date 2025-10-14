@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -21,12 +21,20 @@ app.use("/api/papers", paperRoutes);
 app.use("/api/research-papers/:paperId/comments", commentRoutes);
 app.use("/api/admin", adminRoutes);
 
+// In development, use `alter: true` so Sequelize updates tables to match models.
+// For production, use migrations instead.
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => {
-    console.log("Database & tables created!");
+    console.log("Database synced (alter applied if needed)");
     app.listen(3000, () => console.log("Server running on port 3000"));
   })
   .catch((err) => {
-    console.error("Error creating database tables:", err);
+    console.error("Error syncing database:", err);
   });
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Server error' });
+});

@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const paperController = require("../controllers/paperController");
 const authenticateToken = require("../middleware/auth");
+const optionalAuth = require("../middleware/optionalAuth");
 
-// Public: Get all published papers
-router.get("/", paperController.getPublishedPapers);
+// Public: Get all published papers (supports query params: ?mine=true, ?status=all)
+router.get("/", optionalAuth, paperController.getPublishedPapers);
 // Public/Protected: Get single paper by id
-router.get("/:id", authenticateToken, paperController.getPaperById);
+// note: controller allows public access for published papers; remove strict auth middleware
+router.get("/:id", paperController.getPaperById);
 // Author: Submit new paper
 router.post("/submit", authenticateToken, paperController.submitPaper);
 // Author: Update paper
