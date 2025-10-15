@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const paperController = require("../controllers/paperController");
 const authenticateToken = require("../middleware/auth");
-const optionalAuth = require("../middleware/optionalAuth");
 
-// Public: Get all published papers (supports query params: ?mine=true, ?status=all)
-router.get("/", optionalAuth, paperController.getPublishedPapers);
+// Public: Get papers (supports query params: ?authorId=, ?status=all)
+// This endpoint is fully public and does not require authentication.
+router.get("/", paperController.getPublishedPapers);
 // Public/Protected: Get single paper by id
 // note: controller allows public access for published papers; remove strict auth middleware
 router.get("/:id", paperController.getPaperById);
