@@ -66,15 +66,11 @@ exports.getPaperById = async (req, res) => {
   try {
     const paper = await Paper.findByPk(id);
     if (!paper) return res.status(404).json({ error: "Paper not found" });
-    if (
-      paper.status !== "published" &&
-      req.user?.id !== paper.authorId &&
-      req.user?.role !== "admin" &&
-      req.user?.id !== paper.reviewerId
-    ) {
-      return res.status(403).json({ error: "Not authorized" });
-    }
-    res.json(paper);
+    // Public access: return the paper to any requester.
+    // Note: previously unpublished papers were restricted; this endpoint now
+    // returns the paper regardless of status. If you want to keep some
+    // restriction (e.g., only published), we can add query params.
+    return res.json(paper);
   } catch (error) {
     console.error("paperController.getPaperById error:", error);
     res.status(500).json({ error: "Server error" });
